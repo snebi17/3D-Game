@@ -1,5 +1,5 @@
 import { Renderer } from "../helpers/Renderer.js";
-import { Controller } from "../helpers/InputController.js";
+import { InputController } from "../helpers/InputController.js";
 
 export class Application {
 	constructor(canvas, glOptions) {
@@ -83,8 +83,3 @@ export class Application {
 		// resize code (e.g. update projection matrix)
 	}
 }
-
-const canvas = document.querySelector("screen");
-const app = new Application(canvas);
-await app.init();
-document.querySelector(".loader-container").remove();
