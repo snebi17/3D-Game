@@ -58,11 +58,15 @@ export class Application {
 		this.renderer = new Renderer(gl);
 
 		this.root = new Node();
-
 		this.camera = new Node();
+
 		this.camera.translation = [0, 1, 0];
 		this.camera.projection = mat4.create();
 		this.root.addChild(this.camera);
+
+		this.floor = new Node();
+		this.ceiling = new Node();
+		this.walls = [];
 
 		this.controller = new Controller(this.camera, this.canvas);
 	}

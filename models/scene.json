@@ -1,0 +1,36 @@
+{
+    "nodes": [
+        {
+            "type": "camera",
+            "translation": [0, 1, 0],
+            "aabb": {
+                "min": [-0.2, -0.2, -0.2],
+                "max": [0.2, 0.2, 0.2]
+            },
+            "aspect": 1,
+            "fov": 1.5,
+            "near": 0.01,
+            "far": 100
+        }, 
+        {
+            "type": "wall",
+            "mesh": 0,
+            "texture": 0,
+            "aabb": {
+                "min": [-100, -100, -100],
+                "max": [100, 100, 100]
+            },
+            "translation": [0, 1, -5]
+        },
+        {
+            "type:": "floor"
+        }
+    ],
+    "textures": [
+        "../textures/wallpaper.png"
+    ],
+    "meshes": [
+        "../meshes/wall.json",
+        "../meshes/floor.json"
+    ]
+}
