@@ -55,7 +55,6 @@ export class Application {
 
     async start() {
         // initialization code (including event handler binding)
-		console.log("hehe");
 		this.loader = new GLTFLoader();
         await this.loader.load('../models/gltf/source/scene.gltf');
 
@@ -69,6 +68,8 @@ export class Application {
         if (!this.camera.camera) {
             throw new Error('Camera node does not contain a camera reference');
         }
+
+		console.log(this.camera);
 
         this.controller = new FirstPersonController(this.camera, this.canvas);
         this.time = performance.now();
@@ -107,8 +108,3 @@ export class Application {
         }
     }
 }
-
-const canvas = document.querySelector('canvas');
-const app = new Application(canvas);
-await app.init();
-document.querySelector('.loader-container').remove();

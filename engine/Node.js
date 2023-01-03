@@ -5,7 +5,7 @@ export class Node {
     constructor(options = {}) {
         this._translation = options.translation
             ? vec3.clone(options.translation)
-            : vec3.fromValues(0, 0, 0);
+            : vec3.fromValues(0, 1, 5);
         this._rotation = options.rotation
             ? quat.clone(options.rotation)
             : quat.fromValues(0, 0, 0, 1);

@@ -243,7 +243,6 @@ export class GLTFLoader {
 
     async loadCamera(nameOrIndex) {
         const gltfSpec = this.findByNameOrIndex(this.gltf.cameras, nameOrIndex);
-        console.log(gltfSpec);
 
         if (this.cache.has(gltfSpec)) {
             return this.cache.get(gltfSpec);

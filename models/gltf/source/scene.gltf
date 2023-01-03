@@ -123,9 +123,7 @@
             ]
         },
         {
-            "children" : [
-                0
-            ],
+            "children": [0],
             "name" : "Camera",
             "rotation" : [
                 0,
