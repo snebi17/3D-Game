@@ -36,6 +36,10 @@ export class FirstPersonController {
         // Pointer sensitivity in radians per pixel.
         this.pointerSensitivity = 0.0005;
 
+        // Walk sound
+        this.walkAudio = new Audio('/assets/walk.mp3');
+        this.walkAudio.loop = true;
+
         this.initHandlers();
     }
 
@@ -133,6 +137,11 @@ export class FirstPersonController {
         quat.rotateY(rotation, rotation, this.yaw);
         quat.rotateX(rotation, rotation, this.pitch);
         this.node.rotation = rotation;
+
+
+        // Play audio if velocity is different than [0, 0, 0]
+        if (speed > 1.8) this.walkAudio.play()
+        else this.walkAudio.pause()
     }
 
     pointermoveHandler(e) {
