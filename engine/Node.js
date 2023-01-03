@@ -1,149 +1,153 @@
-import { vec3, mat4, quat } from "../lib/gl-matrix-min.js";
+import { vec3, mat4, quat } from '../../lib/gl-matrix-module.js';
 
 export class Node {
-	constructor(options = {}) {
-		this._translation = options.translation
-			? vec3.clone(options.translation)
-			: vec3.fromValues(0, 0, 0);
-		this._rotation = options.rotation
-			? quat.clone(options.rotation)
-			: quat.fromValues(0, 0, 0, 1);
-		this._scale = options.scale
-			? vec3.clone(options.scale)
-			: vec3.fromValues(1, 1, 1);
-		this._matrix = options.matrix ? mat4.clone(options.matrix) : mat4.create();
 
-		if (options.matrix) {
-			this.updateTransformationComponents();
-		} else if (options.translation || options.rotation || options.scale) {
-			this.updateTransformationMatrix();
-		}
+    constructor(options = {}) {
+        this._translation = options.translation
+            ? vec3.clone(options.translation)
+            : vec3.fromValues(0, 0, 0);
+        this._rotation = options.rotation
+            ? quat.clone(options.rotation)
+            : quat.fromValues(0, 0, 0, 1);
+        this._scale = options.scale
+            ? vec3.clone(options.scale)
+            : vec3.fromValues(1, 1, 1);
+        this._matrix = options.matrix
+            ? mat4.clone(options.matrix)
+            : mat4.create();
 
-		this.transformationMatrixNeedsUpdate = false;
-		this.transformationComponentsNeedUpdate = false;
 
-		this.camera = options.camera || null;
-		this.mesh = options.mesh || null;
+        if (options.matrix) {
+            this.updateTransformationComponents();
+        } else if (options.translation || options.rotation || options.scale) {
+            this.updateTransformationMatrix();
+        }
 
-		this.children = [...(options.children || [])];
-		for (const child of this.children) {
-			child.parent = this;
-		}
-		this.parent = null;
-	}
+        this.transformationMatrixNeedsUpdate = false;
+        this.transformationComponentsNeedUpdate = false;
 
-	updateTransformationComponents() {
-		mat4.getRotation(this._rotation, this._matrix);
-		mat4.getTranslation(this._translation, this._matrix);
-		mat4.getScaling(this._scale, this._matrix);
+        this.camera = options.camera || null;
+        this.mesh = options.mesh || null;
 
-		this.transformationComponentsNeedUpdate = false;
-	}
+        this.children = [...(options.children || [])];
+        for (const child of this.children) {
+            child.parent = this;
+        }
+        this.parent = null;
+    }
 
-	updateTransformationMatrix() {
-		mat4.fromRotationTranslationScale(
-			this._matrix,
-			this._rotation,
-			this._translation,
-			this._scale
-		);
+    updateTransformationComponents() {
+        mat4.getRotation(this._rotation, this._matrix);
+        mat4.getTranslation(this._translation, this._matrix);
+        mat4.getScaling(this._scale, this._matrix);
 
-		this.transformationMatrixNeedsUpdate = false;
-	}
+        this.transformationComponentsNeedUpdate = false;
+    }
 
-	get translation() {
-		if (this.transformationComponentsNeedUpdate) {
-			this.updateTransformationComponents();
-		}
-		return vec3.clone(this._translation);
-	}
+    updateTransformationMatrix() {
+        mat4.fromRotationTranslationScale(
+            this._matrix,
+            this._rotation,
+            this._translation,
+            this._scale);
 
-	set translation(translation) {
-		if (this.transformationComponentsNeedUpdate) {
-			this.updateTransformationComponents();
-		}
-		this._translation = vec3.clone(translation);
-		this.transformationMatrixNeedsUpdate = true;
-	}
+        this.transformationMatrixNeedsUpdate = false;
+    }
 
-	get rotation() {
-		if (this.transformationComponentsNeedUpdate) {
-			this.updateTransformationComponents();
-		}
-		return quat.clone(this._rotation);
-	}
+    get translation() {
+        if (this.transformationComponentsNeedUpdate) {
+            this.updateTransformationComponents();
+        }
+        return vec3.clone(this._translation);
+    }
 
-	set rotation(rotation) {
-		if (this.transformationComponentsNeedUpdate) {
-			this.updateTransformationComponents();
-		}
-		this._rotation = quat.clone(rotation);
-		this.transformationMatrixNeedsUpdate = true;
-	}
+    set translation(translation) {
+        if (this.transformationComponentsNeedUpdate) {
+            this.updateTransformationComponents();
+        }
+        this._translation = vec3.clone(translation);
+        this.transformationMatrixNeedsUpdate = true;
+    }
 
-	get scale() {
-		if (this.transformationComponentsNeedUpdate) {
-			this.updateTransformationComponents();
-		}
-		return vec3.clone(this._scale);
-	}
+    get rotation() {
+        if (this.transformationComponentsNeedUpdate) {
+            this.updateTransformationComponents();
+        }
+        return quat.clone(this._rotation);
+    }
 
-	set scale(scale) {
-		if (this.transformationComponentsNeedUpdate) {
-			this.updateTransformationComponents();
-		}
-		this._scale = vec3.clone(scale);
-		this.transformationMatrixNeedsUpdate = true;
-	}
+    set rotation(rotation) {
+        if (this.transformationComponentsNeedUpdate) {
+            this.updateTransformationComponents();
+        }
+        this._rotation = quat.clone(rotation);
+        this.transformationMatrixNeedsUpdate = true;
+    }
 
-	get localMatrix() {
-		if (this.transformationMatrixNeedsUpdate) {
-			this.updateTransformationMatrix();
-		}
-		return mat4.clone(this._matrix);
-	}
+    get scale() {
+        if (this.transformationComponentsNeedUpdate) {
+            this.updateTransformationComponents();
+        }
+        return vec3.clone(this._scale);
+    }
 
-	set localMatrix(matrix) {
-		this._matrix = mat4.clone(matrix);
-		this.transformationComponentsNeedUpdate = true;
-		this.transformationMatrixNeedsUpdate = false;
-	}
+    set scale(scale) {
+        if (this.transformationComponentsNeedUpdate) {
+            this.updateTransformationComponents();
+        }
+        this._scale = vec3.clone(scale);
+        this.transformationMatrixNeedsUpdate = true;
+    }
 
-	get globalMatrix() {
-		if (this.parent) {
-			const globalMatrix = this.parent.globalMatrix;
-			return mat4.multiply(globalMatrix, globalMatrix, this.localMatrix);
-		} else {
-			return this.localMatrix;
-		}
-	}
+    get localMatrix() {
+        if (this.transformationMatrixNeedsUpdate) {
+            this.updateTransformationMatrix();
+        }
+        return mat4.clone(this._matrix);
+    }
 
-	addChild(node) {
-		if (node.parent) {
-			node.parent.removeChild(node);
-		}
+    set localMatrix(matrix) {
+        this._matrix = mat4.clone(matrix);
+        this.transformationComponentsNeedUpdate = true;
+        this.transformationMatrixNeedsUpdate = false;
+    }
 
-		this.children.push(node);
-		node.parent = this;
-	}
+    get globalMatrix() {
+        if (this.parent) {
+            const globalMatrix = this.parent.globalMatrix;
+            return mat4.multiply(globalMatrix, globalMatrix, this.localMatrix);
+        } else {
+            return this.localMatrix;
+        }
+    }
 
-	removeChild(node) {
-		const index = this.children.indexOf(node);
-		if (index >= 0) {
-			this.children.splice(index, 1);
-			node.parent = null;
-		}
-	}
+    addChild(node) {
+        if (node.parent) {
+            node.parent.removeChild(node);
+        }
 
-	traverse(before, after) {
-		if (before) {
-			before(this);
-		}
-		for (const child of this.children) {
-			child.traverse(before, after);
-		}
-		if (after) {
-			after(this);
-		}
-	}
+        this.children.push(node);
+        node.parent = this;
+    }
+
+    removeChild(node) {
+        const index = this.children.indexOf(node);
+        if (index >= 0) {
+            this.children.splice(index, 1);
+            node.parent = null;
+        }
+    }
+
+    traverse(before, after) {
+        if (before) {
+            before(this);
+        }
+        for (const child of this.children) {
+            child.traverse(before, after);
+        }
+        if (after) {
+            after(this);
+        }
+    }
+
 }

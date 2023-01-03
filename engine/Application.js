@@ -1,85 +1,114 @@
-import { Renderer } from "../helpers/Renderer.js";
-import { InputController } from "../helpers/InputController.js";
+import { GLTFLoader } from "../helpers/GLTFLoader.js";
+import { FirstPersonController } from '../helpers/FirstPersonController.js';
+import { Renderer } from '../helpers/Renderer.js';
 
 export class Application {
-	constructor(canvas, glOptions) {
-		this._update = this._update.bind(this);
 
-		this.canvas = canvas;
-		this._initGL(glOptions);
-	}
+    constructor(canvas, glOptions) {
+        this._update = this._update.bind(this);
 
-	async init() {
-		await this.start();
-		requestAnimationFrame(this._update);
-	}
+        this.canvas = canvas;
+        this._initGL(glOptions);
+    }
 
-	_initGL(glOptions) {
-		this.gl = null;
-		try {
-			this.gl = this.canvas.getContext("webgl2", glOptions);
-		} catch (error) {}
+    async init() {
+        await this.start();
+        requestAnimationFrame(this._update);
+    }
 
-		if (!this.gl) {
-			console.log("Cannot create WebGL 2.0 context");
-		}
-	}
+    _initGL(glOptions) {
+        this.gl = null;
+        try {
+            this.gl = this.canvas.getContext('webgl2', glOptions);
+        } catch (error) {
+        }
 
-	_update() {
-		this._resize();
-		this.update();
-		this.render();
-		requestAnimationFrame(this._update);
-	}
+        if (!this.gl) {
+            console.log('Cannot create WebGL 2.0 context');
+        }
+    }
 
-	_resize() {
-		const canvas = this.canvas;
-		const gl = this.gl;
+    _update() {
+        this._resize();
+        this.update();
+        this.render();
+        requestAnimationFrame(this._update);
+    }
 
-		const pixelRatio = window.devicePixelRatio;
-		const width = pixelRatio * canvas.clientWidth;
-		const height = pixelRatio * canvas.clientHeight;
+    _resize() {
+        const canvas = this.canvas;
+        const gl = this.gl;
 
-		console.log(canvas.width, canvas.height);
+        const pixelRatio = window.devicePixelRatio;
+        const width = pixelRatio * canvas.clientWidth;
+        const height = pixelRatio * canvas.clientHeight;
 
-		if (canvas.width !== width || canvas.height !== height) {
-			canvas.width = width;
-			canvas.height = height;
+        if (canvas.width !== width || canvas.height !== height) {
+            canvas.width = width;
+            canvas.height = height;
 
-			gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+            gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 
-			this.resize();
-		}
-	}
+            this.resize();
+        }
+    }
 
-	start() {
-		// initialization code (including event handler binding)
-		const gl = this.gl;
-		this.renderer = new Renderer(gl);
+    async start() {
+        // initialization code (including event handler binding)
+		console.log("hehe");
+		this.loader = new GLTFLoader();
+        await this.loader.load('../models/gltf/source/scene.gltf');
 
-		this.root = new Node();
-		this.camera = new Node();
+        this.scene = await this.loader.loadScene(this.loader.defaultScene);
+        this.camera = await this.loader.loadNode('Camera_Orientation');
 
-		this.camera.translation = [0, 1, 0];
-		this.camera.projection = mat4.create();
-		this.root.addChild(this.camera);
+        if (!this.scene || !this.camera) {
+            throw new Error('Scene or Camera not present in glTF');
+        }
+        
+        if (!this.camera.camera) {
+            throw new Error('Camera node does not contain a camera reference');
+        }
 
-		this.floor = new Node();
-		this.ceiling = new Node();
-		this.walls = [];
+        this.controller = new FirstPersonController(this.camera, this.canvas);
+        this.time = performance.now();
+        this.startTime = this.time;
+        
+        this.renderer = new Renderer(this.gl);
+        this.renderer.prepareScene(this.scene);
+        this.resize();
+    }
 
-		this.controller = new Controller(this.camera, this.canvas);
-	}
+    update() {
+        // update code (input, animations, AI ...)
+		this.time = performance.now();
+        const dt = (this.time - this.startTime) * 0.001;
+        this.startTime = this.time;
+        
+        this.controller.update(dt);
+    }
 
-	update() {
-		// update code (input, animations, AI ...)
-	}
+    render() {
+        // render code (gl API calls)
+		if (this.renderer) {
+            this.renderer.render(this.scene, this.camera);
+        }
+    }
 
-	render() {
-		// render code (gl API calls)
-	}
+    resize() {
+        // resize code (e.g. update projection matrix)
+		const w = this.canvas.clientWidth;
+        const h = this.canvas.clientHeight;
+        const aspectRatio = w / h;
 
-	resize() {
-		// resize code (e.g. update projection matrix)
-	}
+        if (this.camera) {
+            this.camera.camera.aspect = aspectRatio;
+            this.camera.camera.updateMatrix();
+        }
+    }
 }
+
+const canvas = document.querySelector('canvas');
+const app = new Application(canvas);
+await app.init();
+document.querySelector('.loader-container').remove();
